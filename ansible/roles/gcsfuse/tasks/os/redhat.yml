@@ -11,6 +11,8 @@
     - fuse
     - git
     - golang
+    - make
+    - gcc
     state: present
     update_cache: yes
   become: yes

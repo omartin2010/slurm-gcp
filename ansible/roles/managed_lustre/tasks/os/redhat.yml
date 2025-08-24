@@ -38,7 +38,7 @@
 
   - name: Install Managed Lustre Client after reboot
     package:
-      name: "{{ managed_lustre_client_pkgs }}"
+      name: "{{ managed_lustre_packages }}"
       state: present
       update_cache: yes
   when: kernel_update.changed
@@ -47,7 +47,7 @@
 # This task runs only if the kernel was NOT updated.
 - name: Install Managed Lustre Client
   package:
-    name: "{{ managed_lustre_client_pkgs }}"
+    name: "{{ managed_lustre_packages }}"
     state: present
     update_cache: yes
   when: not kernel_update.changed
