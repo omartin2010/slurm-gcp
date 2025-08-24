@@ -38,7 +38,9 @@
     chdir: /tmp/gcsfuse
   become: yes
   environment:
+    HOME: /root
     GOPATH: "/root/go"
+    GOCACHE: /root/.cache/go-build
 
 - name: Symlink Gcsfuse binary to /usr/local/bin
   file:
