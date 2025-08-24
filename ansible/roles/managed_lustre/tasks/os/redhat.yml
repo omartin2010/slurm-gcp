@@ -17,6 +17,7 @@
     update_cache: yes
     disablerepo: "*"
     enablerepo: "lustre-client-rocky-{{ ansible_distribution_major_version }}"
+    disable_excludes: all
   register: kernel_update
   become: yes
 
