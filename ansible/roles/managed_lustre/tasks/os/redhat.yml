@@ -1,22 +1,53 @@
 ---
-# Copyright 2025 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 - name: Install Managed Lustre Client Repo
   ansible.builtin.yum_repository:
-    name: lustre-client-rocky-8
-    description: Lustre Client
+    name: "lustre-client-rocky-{{ ansible_distribution_major_version }}"
+    description: "Lustre Client"
     baseurl: '{{ managed_lustre_repo_url }}'
     enabled: true
     gpgcheck: false
+  become: yes
+
+- name: Temporarily disable kernel exclusion
+  ansible.builtin.lineinfile:
+    path: /etc/yum.repos.d/rocky.repo
+    regexp: '^(exclude=.*kernel.*)$'
+    line: '# \1'
+    backrefs: true
+  register: kernel_exclude
+  become: yes
+
+- name: Install Kernel and Lustre Client
+  ansible.builtin.dnf:
+    name: "{{ ['kernel', 'kernel-devel'] + managed_lustre_packages }}"
+    state: present
+    update_cache: true
+    disablerepo: "*"
+    enablerepo: "lustre-client-rocky-{{ ansible_distribution_major_version }},baseos,appstream"
+  register: lustre_install
+  become: true
+
+- name: Re-enable kernel exclusion
+  ansible.builtin.lineinfile:
+    path: /etc/yum.repos.d/rocky.repo
+    regexp: '^# (exclude=.*kernel.*)$'
+    line: '\1'
+    backrefs: true
+  when: kernel_exclude.changed
+  become: yes
+
+- name: Reboot if kernel or lustre was updated
+  block:
+    - name: Rebooting...
+      ansible.builtin.command: /sbin/reboot
+      async: 1
+      poll: 0
+
+    - name: Wait for system to become reachable after reboot
+      ansible.builtin.wait_for_connection:
+        connect_timeout: 20
+        sleep: 5
+        delay: 5
+        timeout: 300
+  when: lustre_install.changed
+  become: yes

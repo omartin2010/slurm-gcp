@@ -55,6 +55,13 @@
     install_pyxis: true
 
   pre_tasks:
+  - name: Install required Ansible collections
+    command: ansible-galaxy collection install -r requirements.yml
+    args:
+      chdir: "{{ playbook_dir }}"
+    run_once: true
+    changed_when: false
+
   - name: Minimum Ansible Version Check
     assert:
       that: ansible_version.full is version_compare({{min_ansible_version}}, '>=')
@@ -86,9 +93,9 @@
   - name: Check Support on Rocky Linux
     when: ansible_distribution == "Rocky"
     ansible.builtin.assert:
-      that: ansible_distribution_major_version is version('8', '==')
+      that: ansible_distribution_major_version is version('8', '==') or ansible_distribution_major_version is version('9', '==')
       fail_msg: |
-        When building Slurm-GCP on Rocky Linux, use release 8
+        When building Slurm-GCP on Rocky Linux, use release 8 or 9
   - name: Check Support on RedHat Linux
     when: ansible_distribution == "RedHat"
     ansible.builtin.assert:

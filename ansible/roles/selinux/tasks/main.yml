@@ -20,8 +20,12 @@
       state: disabled
       policy: targeted
     register: status
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
 
   - name: Reboot
-    reboot:
+    command: /sbin/reboot
+    async: 1
+    poll: 0
     when: status.reboot_required and reboot
   when: ansible_os_family == "RedHat"

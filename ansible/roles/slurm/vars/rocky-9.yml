@@ -1,5 +1,5 @@
 ---
-# Copyright 2024 Google LLC
+# Copyright (C) SchedMD LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,23 +12,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-- name: Install {{ansible_os_family}} Family Kernel Packages
-  dnf:
-    name:
-    - kernel
-    - kernel-devel
-    - kernel-headers
-    - kernel-modules
-    - kernel-tools
-    - kernel-tools-libs
-    #- kernel-tools-libs-devel
-    - '{{ ansible_distribution | lower }}-release'
-    state: latest
-    update_cache: yes
-  register: kernel_update
-- block:
-  - name: Reboot
-    reboot:
-  - name: Gather facts after reboot
-    setup:
-  when: reboot and kernel_update.changed
+
+slurm_packages:
+- cifs-utils
+- gtk2-devel
+- hdf5-devel
+- http-parser-devel
+- hwloc
+- hwloc-devel
+- hwloc-gui
+- json-c-devel
+- libcurl-devel
+- libevent-devel
+- libibmad
+- libibumad
+- libyaml-devel
+- lua
+- lua-devel
+- lz4-devel
+- ncurses-devel
+- numactl
+- numactl-devel
+- openssl-devel
+- pam-devel
+- perl-ExtUtils-MakeMaker
+- readline-devel
+- rrdtool-devel

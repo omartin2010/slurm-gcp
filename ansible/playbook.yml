@@ -64,6 +64,13 @@
     allow_kernel_upgrades: true
 
   pre_tasks:
+  - name: Install required Ansible collections
+    command: ansible-galaxy collection install -r requirements.yml
+    args:
+      chdir: "{{ playbook_dir }}"
+    run_once: true
+    changed_when: false
+
   - name: Minimum Ansible Version Check
     assert:
       that: ansible_version.full is version_compare({{min_ansible_version}}, '>=')
@@ -95,9 +102,9 @@
   - name: Check Support on Rocky Linux
     when: ansible_distribution == "Rocky"
     ansible.builtin.assert:
-      that: ansible_distribution_major_version is version('8', '==')
+      that: ansible_distribution_major_version is version('8', '==') or ansible_distribution_major_version is version('9', '==')
       fail_msg: |
-        When building Slurm-GCP on Rocky Linux, use release 8
+        When building Slurm-GCP on Rocky Linux, use release 8 or 9
   - name: Check Support on RedHat Linux
     when: ansible_distribution == "RedHat"
     ansible.builtin.assert:
@@ -126,9 +133,9 @@
   - name: Check Managed Lustre Install Options
     when: install_managed_lustre
     ansible.builtin.assert:
-      that: (ansible_distribution == "Ubuntu" and (ansible_distribution_version is version('20.04', '==') or ansible_distribution_version is version('22.04', '=='))) or (ansible_distribution == "Rocky" and ansible_distribution_major_version is version('8', '=='))
+      that: (ansible_distribution == "Ubuntu" and (ansible_distribution_version is version('20.04', '==') or ansible_distribution_version is version('22.04', '=='))) or (ansible_distribution == "Rocky" and (ansible_distribution_major_version is version('8', '==') or ansible_distribution_major_version is version('9', '==')))
       fail_msg: |
-        Managed Lustre is only compatible with Rocky 8, Ubuntu 20.04, and Ubuntu 22.04
+        Managed Lustre is only compatible with Rocky 8/9, Ubuntu 20.04, and Ubuntu 22.04
   - name: Freeze kernel before running playbook
     ansible.builtin.command:
       argv:
@@ -141,7 +148,8 @@
   roles:
   - motd
   - common
-  - kernel
+  - role: kernel
+    when: not install_managed_lustre
   - selinux
   - role: cuda
     vars:

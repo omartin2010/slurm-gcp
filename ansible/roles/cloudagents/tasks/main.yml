@@ -13,6 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+- name: Install and configure the Google Cloud Ops Agent
+  include_role:
+    name: google_cloud_ops_agents
+    handlers_from: "{{ 'linux' if ansible_os_family != 'Windows' else 'windows' }}.yml"
+  vars:
+    agent_type: ops-agent
+  when: monitoring_agent == "cloud-ops"
+
+- name: Install and configure the legacy Monitoring Agent
+  include_role:
+    name: google_cloud_ops_agents
+    handlers_from: "{{ 'linux' if ansible_os_family != 'Windows' else 'windows' }}.yml"
+  vars:
+    agent_type: monitoring
+  when: monitoring_agent == "legacy" and ansible_distribution_major_version != '9'
+
+- name: Install and configure the legacy Logging Agent
+  include_role:
+    name: google_cloud_ops_agents
+    handlers_from: "{{ 'linux' if ansible_os_family != 'Windows' else 'windows' }}.yml"
+  vars:
+    agent_type: logging
+  when: monitoring_agent == "legacy" and ansible_distribution_major_version != '9'
+
 - name: Install 'ops-agent' Config
   template:
     src: ops_agent.yaml.j2
@@ -23,10 +47,10 @@
   template:
     src: legacy_agent_daemon_log.conf.j2
     dest: /etc/google-fluentd/config.d/slurm_daemon.conf
-  when: monitoring_agent == "legacy"
+  when: monitoring_agent == "legacy" and ansible_distribution_major_version != '9'
 
 - name: Install 'stackdriver' Config For Slurm Python Script Logs
   template:
     src: legacy_agent_py_script_log.conf.j2
     dest: /etc/google-fluentd/config.d/slurm_py_script.conf
-  when: monitoring_agent == "legacy"
+  when: monitoring_agent == "legacy" and ansible_distribution_major_version != '9'
