@@ -17,6 +17,9 @@
   register: kernel_exclude
   become: yes
 
+- name: "DEBUG: Pre-Lustre Install OS Version Check"
+  include_tasks: ../../debug_os_version.yml
+
 - name: Install Kernel and Lustre Client
   ansible.builtin.dnf:
     name: "{{ ['kernel', 'kernel-devel'] + managed_lustre_packages }}"
@@ -26,6 +29,9 @@
     enablerepo: "lustre-client-rocky-{{ ansible_distribution_major_version }},baseos,appstream"
   register: lustre_install
   become: true
+
+- name: "DEBUG: Post-Lustre Install OS Version Check"
+  include_tasks: ../../debug_os_version.yml
 
 - name: Re-enable kernel exclusion
   ansible.builtin.lineinfile:
@@ -51,3 +57,6 @@
         timeout: 300
   when: lustre_install.changed
   become: yes
+
+- name: "DEBUG: Post-Reboot OS Version Check"
+  include_tasks: ../../debug_os_version.yml

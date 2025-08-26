@@ -1,0 +1,24 @@
+---
+- name: "DEBUG: Check /etc/os-release"
+  ansible.builtin.command:
+    cmd: "cat /etc/os-release"
+  register: os_release
+  changed_when: false
+  become: yes
+
+- name: "DEBUG: Display /etc/os-release"
+  ansible.builtin.debug:
+    var: os_release.stdout_lines
+  become: yes
+
+- name: "DEBUG: Check /etc/redhat-release"
+  ansible.builtin.command:
+    cmd: "cat /etc/redhat-release"
+  register: redhat_release
+  changed_when: false
+  become: yes
+
+- name: "DEBUG: Display /etc/redhat-release"
+  ansible.builtin.debug:
+    var: redhat_release.stdout_lines
+  become: yes
