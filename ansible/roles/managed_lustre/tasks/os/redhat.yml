@@ -27,13 +27,21 @@
   register: lustre_install
   become: true
 
+- name: Find the version of the latest installed kernel
+  ansible.builtin.shell:
+    cmd: "rpm -q kernel --last | head -n 1 | sed 's/^kernel-//'"
+  register: latest_kernel
+  changed_when: false
+  when: lustre_install.changed
+  become: yes
+
 - name: Force regeneration of initramfs for the newly installed kernel
   ansible.builtin.command:
-    cmd: dracut --force --kver {{ kernel_version }}
-  vars:
-    kernel_package: "{{ lustre_install.results | selectattr('name', 'equalto', 'kernel') | list | first }}"
-    kernel_version: "{{ kernel_package.version }}-{{ kernel_package.release }}.{{ kernel_package.arch }}"
-  when: lustre_install.changed
+    cmd: "dracut --force --kver {{ latest_kernel.stdout }}"
+  when: 
+    - lustre_install.changed
+    - latest_kernel.stdout is defined
+    - latest_kernel.stdout != ""
   become: yes
 
 - name: Re-enable kernel exclusion
