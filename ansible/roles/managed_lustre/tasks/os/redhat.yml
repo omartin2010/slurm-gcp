@@ -29,7 +29,7 @@
 
 - name: Find the version of the latest installed kernel
   ansible.builtin.shell:
-    cmd: "rpm -q kernel --last | head -n 1 | sed 's/^kernel-//'"
+    cmd: "rpm -q kernel --last | head -n 1 | awk '{print $1}' | sed 's/^kernel-//'"
   register: latest_kernel
   changed_when: false
   when: lustre_install.changed
