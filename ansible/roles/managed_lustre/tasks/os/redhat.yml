@@ -27,6 +27,15 @@
   register: lustre_install
   become: true
 
+- name: Force regeneration of initramfs for the newly installed kernel
+  ansible.builtin.command:
+    cmd: dracut --force --kver {{ kernel_version }}
+  vars:
+    kernel_package: "{{ lustre_install.results | selectattr('name', 'equalto', 'kernel') | list | first }}"
+    kernel_version: "{{ kernel_package.version }}-{{ kernel_package.release }}.{{ kernel_package.arch }}"
+  when: lustre_install.changed
+  become: yes
+
 - name: Re-enable kernel exclusion
   ansible.builtin.lineinfile:
     path: /etc/yum.repos.d/rocky.repo
