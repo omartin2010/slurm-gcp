@@ -37,7 +37,7 @@
 
 - name: Force regeneration of initramfs for the newly installed kernel
   ansible.builtin.command:
-    cmd: "dracut --force --hostonly --kver {{ latest_kernel.stdout | trim }}"
+    cmd: "dracut --force --no-hostonly --add-drivers ' nvme gve ' --kver {{ latest_kernel.stdout | trim }}"
   when: 
     - lustre_install.changed
     - latest_kernel.stdout is defined
