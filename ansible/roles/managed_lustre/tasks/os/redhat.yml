@@ -8,6 +8,7 @@
     gpgcheck: false
   become: yes
 
+
 - name: Install Lustre Client with DKMS support
   ansible.builtin.dnf:
     name:
@@ -16,6 +17,8 @@
       # This ensures the kernel development headers for the *currently running* kernel are installed
       # so DKMS can build the module immediately.
       - "kernel-devel-{{ ansible_kernel }}"
+    exclude:
+      - kmod-lustre-client
     state: present
     update_cache: true
   register: lustre_install
