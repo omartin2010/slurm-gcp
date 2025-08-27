@@ -37,11 +37,11 @@
 
 - name: Force regeneration of initramfs for the newly installed kernel
   ansible.builtin.command:
-    cmd: "dracut --force --kver {{ latest_kernel.stdout }}"
+    cmd: "dracut --force --kver {{ latest_kernel.stdout | trim }}"
   when: 
     - lustre_install.changed
     - latest_kernel.stdout is defined
-    - latest_kernel.stdout != ""
+    - latest_kernel.stdout | trim != ""
   become: yes
 
 - name: Re-enable kernel exclusion
