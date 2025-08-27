@@ -8,50 +8,70 @@
     gpgcheck: false
   become: yes
 
-- name: Temporarily disable kernel exclusion
-  ansible.builtin.lineinfile:
-    path: /etc/yum.repos.d/rocky.repo
-    regexp: '^(exclude=.*kernel.*)$'
-    line: '# \1'
-    backrefs: true
-  register: kernel_exclude
-  become: yes
-
-- name: Install Kernel and Lustre Client
+- name: Install Lustre Client with DKMS support
   ansible.builtin.dnf:
-    name: "{{ ['kernel', 'kernel-devel'] + managed_lustre_packages }}"
+    name:
+      - lustre-client
+      - lustre-client-dkms
+      # This ensures the kernel development headers for the *currently running* kernel are installed
+      # so DKMS can build the module immediately.
+      - "kernel-devel-{{ ansible_kernel }}"
     state: present
     update_cache: true
-    disablerepo: "*"
-    enablerepo: "lustre-client-rocky-{{ ansible_distribution_major_version }},baseos,appstream"
   register: lustre_install
-  become: true
+  become: yes
 
-- name: Find the version of the latest installed kernel
-  ansible.builtin.shell:
-    cmd: "rpm -q kernel --last | head -n 1 | awk '{print $1}' | sed 's/^kernel-//'"
-  register: latest_kernel
-  changed_when: false
+- name: Force a DKMS build/install for Lustre
+  ansible.builtin.command:
+    # This ensures the module is built and installed for the current kernel
+    cmd: dkms autoinstall
   when: lustre_install.changed
   become: yes
 
-- name: Force regeneration of initramfs for the newly installed kernel
-  ansible.builtin.command:
-    cmd: "dracut --force --no-hostonly --add-drivers ' nvme gve ' --kver {{ latest_kernel.stdout | trim }}"
-  when: 
-    - lustre_install.changed
-    - latest_kernel.stdout is defined
-    - latest_kernel.stdout | trim != ""
-  become: yes
+# - name: Temporarily disable kernel exclusion
+#   ansible.builtin.lineinfile:
+#     path: /etc/yum.repos.d/rocky.repo
+#     regexp: '^(exclude=.*kernel.*)$'
+#     line: '# \1'
+#     backrefs: true
+#   register: kernel_exclude
+#   become: yes
 
-- name: Re-enable kernel exclusion
-  ansible.builtin.lineinfile:
-    path: /etc/yum.repos.d/rocky.repo
-    regexp: '^# (exclude=.*kernel.*)$'
-    line: '\1'
-    backrefs: true
-  when: kernel_exclude.changed
-  become: yes
+# - name: Install Kernel and Lustre Client
+#   ansible.builtin.dnf:
+#     name: "{{ ['kernel', 'kernel-devel'] + managed_lustre_packages }}"
+#     state: present
+#     update_cache: true
+#     disablerepo: "*"
+#     enablerepo: "lustre-client-rocky-{{ ansible_distribution_major_version }},baseos,appstream"
+#   register: lustre_install
+#   become: true
+
+# - name: Find the version of the latest installed kernel
+#   ansible.builtin.shell:
+#     cmd: "rpm -q kernel --last | head -n 1 | awk '{print $1}' | sed 's/^kernel-//'"
+#   register: latest_kernel
+#   changed_when: false
+#   when: lustre_install.changed
+#   become: yes
+
+# - name: Force regeneration of initramfs for the newly installed kernel
+#   ansible.builtin.command:
+#     cmd: "dracut --force --no-hostonly --add-drivers ' nvme gve ' --kver {{ latest_kernel.stdout | trim }}"
+#   when: 
+#     - lustre_install.changed
+#     - latest_kernel.stdout is defined
+#     - latest_kernel.stdout | trim != ""
+#   become: yes
+
+# - name: Re-enable kernel exclusion
+#   ansible.builtin.lineinfile:
+#     path: /etc/yum.repos.d/rocky.repo
+#     regexp: '^# (exclude=.*kernel.*)$'
+#     line: '\1'
+#     backrefs: true
+#   when: kernel_exclude.changed
+#   become: yes
 
 # - name: Reboot if kernel or lustre was updated
 #   block:
