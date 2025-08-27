@@ -64,9 +64,6 @@
     allow_kernel_upgrades: true
 
   pre_tasks:
-  - name: "DEBUG: Initial OS Version Check"
-    include_tasks: debug_os_version.yml
-
   - name: Install required Ansible collections
     command: ansible-galaxy collection install -r requirements.yml
     args:
@@ -209,6 +206,3 @@
     when:
     - ansible_os_family == "Debian"
     - allow_kernel_upgrades
-
-  - name: "DEBUG: Final OS Version Check"
-    include_tasks: debug_os_version.yml
