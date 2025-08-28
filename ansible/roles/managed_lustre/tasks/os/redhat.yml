@@ -14,11 +14,10 @@
     name:
       - lustre-client
       - lustre-client-dkms
-      # This ensures the kernel development headers for the *currently running* kernel are installed
-      # so DKMS can build the module immediately.
       - "kernel-devel-{{ ansible_kernel }}"
-    exclude:
-      - kmod-lustre-client
+    # exclude:
+    #   # ensure the use of 
+    #   - kmod-lustre-client
     state: present
     update_cache: true
   register: lustre_install
