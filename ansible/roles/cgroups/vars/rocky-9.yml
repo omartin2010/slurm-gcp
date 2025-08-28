@@ -15,6 +15,7 @@
 
 # The libcgroup and libcgroup-pam packages are deprecated in RHEL 9.
 # Cgroup management is now handled by systemd.
-cgroup_packages: []
+cgroup_packages:
+- dbus-devel
 
 cgroup_grub_cmdline_linux: []
