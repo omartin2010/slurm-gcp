@@ -15,9 +15,8 @@
       - lustre-client
       - lustre-client-dkms
       - "kernel-devel-{{ ansible_kernel }}"
-    # exclude:
-    #   # ensure the use of 
-    #   - kmod-lustre-client
+    exclude:
+      - kmod-lustre-client
     state: present
     update_cache: true
   register: lustre_install
