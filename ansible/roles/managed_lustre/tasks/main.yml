@@ -54,7 +54,9 @@
   ansible.builtin.package:
     name: '{{ managed_lustre_packages }}'
     state: present
-  when: install_managed_lustre
+  when:
+    - install_managed_lustre
+    - ansible_os_family != "RedHat"
 
 - name: Skip Managed Lustre install
   ansible.builtin.debug:
