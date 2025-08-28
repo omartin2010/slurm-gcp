@@ -25,9 +25,6 @@
 - name: Install Lustre Client with DKMS support
   ansible.builtin.dnf:
     name: "{{ managed_lustre_packages + ['kernel-devel-' + ansible_kernel] }}"
-      # - lustre-client
-      # - lustre-client-dkms
-      # - "kernel-devel-{{ ansible_kernel }}"
     exclude:
       - kmod-lustre-client
     state: present
@@ -41,63 +38,3 @@
   when: lustre_install.changed
   become: yes
 
-# - name: Temporarily disable kernel exclusion
-#   ansible.builtin.lineinfile:
-#     path: /etc/yum.repos.d/rocky.repo
-#     regexp: '^(exclude=.*kernel.*)$'
-#     line: '# \1'
-#     backrefs: true
-#   register: kernel_exclude
-#   become: yes
-
-# - name: Install Kernel and Lustre Client
-#   ansible.builtin.dnf:
-#     name: "{{ ['kernel', 'kernel-devel'] + managed_lustre_packages }}"
-#     state: present
-#     update_cache: true
-#     disablerepo: "*"
-#     enablerepo: "lustre-client-rocky-{{ ansible_distribution_major_version }},baseos,appstream"
-#   register: lustre_install
-#   become: true
-
-# - name: Find the version of the latest installed kernel
-#   ansible.builtin.shell:
-#     cmd: "rpm -q kernel --last | head -n 1 | awk '{print $1}' | sed 's/^kernel-//'"
-#   register: latest_kernel
-#   changed_when: false
-#   when: lustre_install.changed
-#   become: yes
-
-# - name: Force regeneration of initramfs for the newly installed kernel
-#   ansible.builtin.command:
-#     cmd: "dracut --force --no-hostonly --add-drivers ' nvme gve ' --kver {{ latest_kernel.stdout | trim }}"
-#   when: 
-#     - lustre_install.changed
-#     - latest_kernel.stdout is defined
-#     - latest_kernel.stdout | trim != ""
-#   become: yes
-
-# - name: Re-enable kernel exclusion
-#   ansible.builtin.lineinfile:
-#     path: /etc/yum.repos.d/rocky.repo
-#     regexp: '^# (exclude=.*kernel.*)$'
-#     line: '\1'
-#     backrefs: true
-#   when: kernel_exclude.changed
-#   become: yes
-
-# - name: Reboot if kernel or lustre was updated
-#   block:
-#     - name: Rebooting...
-#       ansible.builtin.command: /sbin/reboot
-#       async: 1
-#       poll: 0
-
-#     - name: Wait for system to become reachable after reboot
-#       ansible.builtin.wait_for_connection:
-#         connect_timeout: 20
-#         sleep: 5
-#         delay: 5
-#         timeout: 300
-#   when: lustre_install.changed
-#   become: yes
