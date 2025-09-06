@@ -54,6 +54,7 @@
     install_gcsfuse: true
     install_pmix: true
     install_pyxis: true
+    install_tpu: true
 
   pre_tasks:
   - name: Install required Ansible collections
@@ -62,7 +63,6 @@
       chdir: "{{ playbook_dir }}"
     run_once: true
     changed_when: false
-
   - name: Minimum Ansible Version Check
     assert:
       that: ansible_version.full is version_compare({{min_ansible_version}}, '>=')
@@ -168,3 +168,6 @@
   - role: ldap
     when: ansible_os_family != 'Debian'
   - scripts
+  - role: tpu
+    when:
+    - install_tpu
