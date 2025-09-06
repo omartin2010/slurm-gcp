@@ -19,6 +19,11 @@
     # state: latest
     update_cache: yes
 
+- name: Install dnf-plugins-core
+  yum:
+    name: dnf-plugins-core
+    state: present
+
 - name: Enable Rocky 9 PowerTools Repository
   command: dnf config-manager --set-enabled crb
   when: ansible_distribution == "Rocky"
