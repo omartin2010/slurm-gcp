@@ -155,6 +155,10 @@
     when:
     - install_lustre
     - ansible_architecture == "x86_64"
+  - role: managed_lustre
+    when:
+    - install_managed_lustre
+    - ansible_architecture == "x86_64"
   - role: gcsfuse
     when:
     - install_gcsfuse
