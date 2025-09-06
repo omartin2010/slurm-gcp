@@ -50,7 +50,6 @@
       modulefiles: /opt/apps/modulefiles
     install_ompi: true
     install_lustre: true
-    install_managed_lustre: false
     install_gcsfuse: true
     install_pmix: true
     install_pyxis: true
@@ -154,10 +153,6 @@
   - role: lustre
     when:
     - install_lustre
-    - ansible_architecture == "x86_64"
-  - role: managed_lustre
-    when:
-    - install_managed_lustre
     - ansible_architecture == "x86_64"
   - role: gcsfuse
     when:

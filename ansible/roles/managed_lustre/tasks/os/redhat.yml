@@ -24,7 +24,7 @@
 
 - name: Install Lustre Client with DKMS support
   ansible.builtin.dnf:
-    name: "{{ managed_lustre_packages + ['kernel-devel-' + ansible_kernel] }}"
+    name: "{{ managed_lustre_packages + ['kernel-devel-' + ansible_kernel, 'kernel-headers-' + ansible_kernel, 'gcc', 'make', 'elfutils-libelf-devel'] }}"
     exclude:
       - kmod-lustre-client
     state: present
