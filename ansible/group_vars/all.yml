@@ -1,0 +1,3 @@
+---
+# This file contains variables that are applied to all hosts.
+project_root: '{{ playbook_dir }}/..'

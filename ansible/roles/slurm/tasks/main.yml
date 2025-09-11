@@ -60,7 +60,7 @@
 
 - name: Copy Scripts
   copy:
-    src: scripts/{{item}}
+    src: '{{ project_root }}/scripts/{{item}}'
     dest: '{{slurm_paths.scripts}}/{{item}}'
     owner: '{{slurm_user.user}}'
     group: '{{slurm_user.group}}'
