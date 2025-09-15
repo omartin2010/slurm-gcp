@@ -135,7 +135,7 @@ EOF
 	# 	TPU_FLAGS="--privileged"
 	# fi
 
-	docker run -d $CGROUP_FLAGS $TPU_FLAGS --net=host --name=slurmd --hostname=$real_name --entrypoint=/usr/bin/systemd --restart unless-stopped $docker_image
+	docker run -d --env OS_ENV=slurm_container -v /etc/google-cloud-ops-agent:/etc/google-cloud-ops-agent:ro $CGROUP_FLAGS $TPU_FLAGS --net=host --name=slurmd --hostname=$real_name --entrypoint=/usr/bin/systemd --restart unless-stopped $docker_image
 	exit 0
 }
 

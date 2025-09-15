@@ -248,6 +248,7 @@ def setup_sudoers():
 slurm ALL= NOPASSWD: /usr/bin/systemctl restart slurmd.service
 slurm ALL= NOPASSWD: /usr/bin/systemctl restart slurmctld.service
 """
+    Path("/etc/sudoers.d").mkdir(parents=True, exist_ok=True)
     sudoers_file = Path("/etc/sudoers.d/slurm")
     sudoers_file.write_text(content)
     sudoers_file.chmod(0o0440)
